@@ -55,9 +55,15 @@ const register = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  try {
-    const { identifier, password } = req.body as unknown as Tlogin;
+  /**
+    #swagger.requestBody = {
+      required: true,
+      schema: {$ref: "#/components/schemas/LoginRequest"}
+    }
+   */
 
+  const { identifier, password } = req.body as unknown as Tlogin;
+  try {
     const userByIdentifier = await UserModel.findOne({
       $or: [{ username: identifier }, { email: identifier }],
     });
@@ -93,6 +99,11 @@ const login = async (req: Request, res: Response) => {
 };
 
 const me = async (req: IreqUser, res: Response) => {
+  /**
+    #swagger.security = [{
+     "bearerAuth": [] 
+     }]
+   */
   try {
     const user = req.user;
     const result = await UserModel.findById(user?.id);
