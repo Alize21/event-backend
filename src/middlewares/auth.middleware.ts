@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IuserToken, getUserData } from "../utils/jwt";
+import { getUserData } from "../utils/jwt";
 import { IreqUser } from "../utils/interface";
 
 export default (req: Request, res: Response, next: NextFunction) => {

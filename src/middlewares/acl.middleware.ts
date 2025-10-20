@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { IreqUser } from "./auth.middleware";
+import { IreqUser } from "../utils/interface";
 
 export default (roles: string[]) => {
   return (req: IreqUser, res: Response, next: NextFunction) => {
