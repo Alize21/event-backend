@@ -1,48 +1,32 @@
 import { IreqUser } from "../utils/interface";
 import { Response } from "express";
 import uploader from "../utils/uploader";
+import response from "../utils/response";
 
 const single = async (req: IreqUser, res: Response) => {
   if (!req.file) {
-    return res.status(400).json({
-      data: null,
-      message: "file does not exist",
-    });
+    response.error(res, null, "file not found");
   }
 
   try {
     const result = await uploader.uploadSingle(req.file as Express.Multer.File);
-    res.status(200).json({
-      data: result,
-      message: "success uploading the file",
-    });
+    response.success(res, result, "success to upload the file");
   } catch {
-    res.status(500).json({
-      data: null,
-      message: "failed to upload the file",
-    });
+    response.error(res, null, "failed to upload the file");
   }
 };
 
 const multiple = async (req: IreqUser, res: Response) => {
   if (!req.files || req.files.length === 0) {
-    return res.status(400).json({
-      data: null,
-      message: "file does not exist",
-    });
+    response.error(res, null, "file does not exist");
   }
 
   try {
     const result = await uploader.uploadMultiple(req.files as Express.Multer.File[]);
-    res.status(200).json({
-      data: result,
-      message: "success uploading the files",
-    });
+
+    response.success(res, result, "success uploading the files");
   } catch {
-    res.status(500).json({
-      data: null,
-      message: "failed to upload the files",
-    });
+    response.error(res, null, "failed to upload the files");
   }
 };
 
@@ -51,15 +35,9 @@ const remove = async (req: IreqUser, res: Response) => {
     const { fileUrl } = req.body as { fileUrl: string };
     const result = await uploader.remove(fileUrl);
 
-    res.status(200).json({
-      data: result,
-      message: "success to remove the file",
-    });
+    response.success(res, result, "success to remove the file");
   } catch {
-    res.status(500).json({
-      data: null,
-      message: "failed to remove the file",
-    });
+    response.error(res, null, "failed to remove the file");
   }
 };
 
