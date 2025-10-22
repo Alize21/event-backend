@@ -5,6 +5,7 @@ import aclMiddleware from "../middlewares/acl.middleware";
 import { ROLES } from "../utils/constant";
 import mediaMiddleware from "../middlewares/media.middleware";
 import mediaController from "../controllers/media.controller";
+import categoryController from "../controllers/category.controller";
 
 const router = express.Router();
 
@@ -12,6 +13,16 @@ router.post("/auth/register", register);
 router.post("/auth/login", login);
 router.get("/auth/me", authMiddleware, me);
 router.post("/auth/activate", activation);
+
+router
+  .route("/category")
+  .post([authMiddleware, aclMiddleware([ROLES.ADMIN])], categoryController.create)
+  .get(categoryController.findAll);
+router
+  .route("/category/:id")
+  .get(categoryController.findOne)
+  .put([authMiddleware, aclMiddleware([ROLES.ADMIN])], categoryController.update)
+  .delete([authMiddleware, aclMiddleware([ROLES.ADMIN])], categoryController.remove);
 
 router.post("/media/upload-single", [authMiddleware, aclMiddleware([ROLES.ADMIN, ROLES.MEMBER]), mediaMiddleware.single("file")], mediaController.single);
 router.post("/media/upload-multiple", [authMiddleware, aclMiddleware([ROLES.ADMIN, ROLES.MEMBER]), mediaMiddleware.multiple("files")], mediaController.multiple);

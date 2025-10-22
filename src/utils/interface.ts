@@ -8,3 +8,9 @@ export interface IuserToken extends Omit<User, "password" | "activationCode" | "
 export interface IreqUser extends Request {
   user?: IuserToken;
 }
+
+export interface IPaginationQuery {
+  page: number;
+  limit: number;
+  search?: string;
+}
