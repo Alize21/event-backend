@@ -6,6 +6,7 @@ import { ROLES } from "../utils/constant";
 import mediaMiddleware from "../middlewares/media.middleware";
 import mediaController from "../controllers/media.controller";
 import categoryController from "../controllers/category.controller";
+import regionController from "../controllers/region.controller";
 
 const router = express.Router();
 
@@ -23,6 +24,13 @@ router
   .get(categoryController.findOne)
   .put([authMiddleware, aclMiddleware([ROLES.ADMIN])], categoryController.update)
   .delete([authMiddleware, aclMiddleware([ROLES.ADMIN])], categoryController.remove);
+
+router.get("/regions", regionController.getAllProvinces);
+router.get("/regions/:id/province", regionController.getProvince);
+router.get("/regions/:id/regency", regionController.getRegency);
+router.get("/regions/:id/district", regionController.getDistrict);
+router.get("/regions/:id/village", regionController.getVillage);
+router.get("/regions-search", regionController.findByCity);
 
 router.post("/media/upload-single", [authMiddleware, aclMiddleware([ROLES.ADMIN, ROLES.MEMBER]), mediaMiddleware.single("file")], mediaController.single);
 router.post("/media/upload-multiple", [authMiddleware, aclMiddleware([ROLES.ADMIN, ROLES.MEMBER]), mediaMiddleware.multiple("files")], mediaController.multiple);
