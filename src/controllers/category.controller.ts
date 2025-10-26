@@ -79,7 +79,7 @@ const update = async (req: IreqUser, res: Response) => {
 const remove = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
-    const result = await CategoryModel.findByIdAndDelete(id);
+    const result = await CategoryModel.findByIdAndDelete(id, { new: true });
 
     response.success(res, result, "category removed successfully");
   } catch (error) {
