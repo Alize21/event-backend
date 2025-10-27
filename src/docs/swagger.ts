@@ -1,3 +1,4 @@
+import { name } from "ejs";
 import swaggerAutogen from "swagger-autogen";
 
 const doc = {
@@ -37,6 +38,28 @@ const doc = {
       },
       ActivationRequest: {
         code: "abcd",
+      },
+      CreateCategoryRequest: {
+        name: "Category Name",
+        description: "Category Description",
+        icon: "https://example.com/icon.png",
+      },
+      CreateEventRequest: {
+        name: "Event - 1 - name",
+        banner: "https://example.com/banner.png",
+        category: "64b7f8f8f8f8f8f8f8f8f8f",
+        description: "This is a sample event description.",
+        startDate: "yyyy-mm-dd hh:mm:ss",
+        endDate: "yyyy-mm-dd hh:mm:ss",
+        location: {
+          region: "1234567890",
+          coordinates: [0.0, 0.0],
+        },
+        isOnline: false,
+        isFeatured: false,
+      },
+      RemoveMediaRequest: {
+        fileUrl: "https://example.com/media.png",
       },
     },
   },
