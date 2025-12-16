@@ -8,6 +8,7 @@ import mediaController from "../controllers/media.controller";
 import categoryController from "../controllers/category.controller";
 import regionController from "../controllers/region.controller";
 import eventController from "../controllers/event.controller";
+import ticketController from "../controllers/ticket.controller";
 
 const router = express.Router();
 
@@ -15,6 +16,17 @@ router.post("/auth/register", register);
 router.post("/auth/login", login);
 router.get("/auth/me", authMiddleware, me);
 router.post("/auth/activate", activation);
+
+router
+  .route("/tickets")
+  .get(ticketController.findAll)
+  .post([authMiddleware, aclMiddleware([ROLES.ADMIN])], ticketController.create);
+router
+  .route("/tickets/:id")
+  .get(ticketController.findOne)
+  .put([authMiddleware, aclMiddleware([ROLES.ADMIN])], ticketController.update)
+  .delete([authMiddleware, aclMiddleware([ROLES.ADMIN])], ticketController.remove);
+router.get("/tickets/:eventId/events", ticketController.findAllByEvent);
 
 router
   .route("/category")
