@@ -9,6 +9,7 @@ import categoryController from "../controllers/category.controller";
 import regionController from "../controllers/region.controller";
 import eventController from "../controllers/event.controller";
 import ticketController from "../controllers/ticket.controller";
+import bannerController from "../controllers/banner.controller";
 
 const router = express.Router();
 
@@ -16,6 +17,16 @@ router.post("/auth/register", register);
 router.post("/auth/login", login);
 router.get("/auth/me", authMiddleware, me);
 router.post("/auth/activate", activation);
+
+router
+  .route("/banners")
+  .get(bannerController.findAll)
+  .post([authMiddleware, aclMiddleware([ROLES.ADMIN])], bannerController.create);
+router
+  .route("/banners/:id")
+  .get(bannerController.findOne)
+  .put([authMiddleware, aclMiddleware([ROLES.ADMIN])], bannerController.update)
+  .delete([authMiddleware, aclMiddleware([ROLES.ADMIN])], bannerController.remove);
 
 router
   .route("/tickets")

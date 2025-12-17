@@ -59,6 +59,16 @@ const error = (res: Response, error: unknown, message: string) => {
   });
 };
 
+const notFound = (res: Response, message: string = "not found") => {
+  res.status(404).json({
+    meta: {
+      status: 404,
+      message,
+    },
+    data: null,
+  });
+};
+
 const unauthorized = (res: Response, message: string = "unauthorized") => {
   res.status(403).json({
     meta: {
@@ -80,4 +90,4 @@ const pagination = (res: Response, data: any[], pagination: Pagination, message:
   });
 };
 
-export default { success, error, unauthorized, pagination };
+export default { success, error, unauthorized, pagination, notFound };
