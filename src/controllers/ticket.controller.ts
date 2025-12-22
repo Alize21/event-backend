@@ -56,7 +56,16 @@ const findOne = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
 
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Ticket not found");
+    }
+
     const result = await TicketModel.findById(id);
+
+    if (!result) {
+      return response.notFound(res, "Ticket not found");
+    }
+
     response.success(res, result, "Ticket Fetched Successfully");
   } catch (error) {
     response.error(res, error, "Fetching Ticket Failed");
@@ -66,6 +75,10 @@ const findOne = async (req: IreqUser, res: Response) => {
 const update = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Ticket not found");
+    }
 
     const result = await TicketModel.findByIdAndUpdate(id, req.body, { new: true });
     response.success(res, result, "Ticket Fetched Successfully");
@@ -77,6 +90,10 @@ const update = async (req: IreqUser, res: Response) => {
 const remove = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Ticket not found");
+    }
 
     const result = await TicketModel.findByIdAndDelete(id, { new: true });
     response.success(res, result, "Ticket Deleted Successfully");
@@ -90,7 +107,7 @@ const findAllByEvent = async (req: IreqUser, res: Response) => {
     const { eventId } = req.params;
 
     if (!isValidObjectId(eventId)) {
-      return response.error(res, null, "Ticket not found");
+      return response.notFound(res, "Event not found");
     }
 
     const result = await TicketModel.find({ events: eventId }).exec();

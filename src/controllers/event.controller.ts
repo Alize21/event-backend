@@ -2,7 +2,7 @@ import { Response } from "express";
 import { IPaginationQuery, IreqUser } from "../utils/interface";
 import response from "../utils/response";
 import EventModel, { eventDAO, TEvent } from "../models/event.model";
-import { FilterQuery } from "mongoose";
+import { FilterQuery, isValidObjectId } from "mongoose";
 
 const create = async (req: IreqUser, res: Response) => {
   try {
@@ -56,7 +56,16 @@ const findAll = async (req: IreqUser, res: Response) => {
 const findOne = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Event not found");
+    }
+
     const result = await EventModel.findById(id);
+
+    if (!result) {
+      return response.notFound(res, "Banner not found");
+    }
 
     response.success(res, result, "Event fetched successfully");
   } catch (error) {
@@ -67,6 +76,11 @@ const findOne = async (req: IreqUser, res: Response) => {
 const update = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Event not found");
+    }
+
     const result = await EventModel.findByIdAndUpdate(id, req.body, { new: true });
 
     response.success(res, result, "Event updated successfully");
@@ -78,6 +92,11 @@ const update = async (req: IreqUser, res: Response) => {
 const remove = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Event not found");
+    }
+
     const result = await EventModel.findByIdAndDelete(id, { new: true });
 
     response.success(res, result, "Event deleted successfully");

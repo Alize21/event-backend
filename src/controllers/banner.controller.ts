@@ -2,7 +2,7 @@ import { Response } from "express";
 import { IPaginationQuery, IreqUser } from "../utils/interface";
 import response from "../utils/response";
 import BannerModel, { bannerDAO, TypeBanner } from "../models/banner.model";
-import { FilterQuery } from "mongoose";
+import { FilterQuery, isValidObjectId } from "mongoose";
 
 const create = async (req: IreqUser, res: Response) => {
   try {
@@ -57,7 +57,16 @@ const findOne = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
 
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Banner not found");
+    }
+
     const result = await BannerModel.findById(id);
+
+    if (!result) {
+      return response.notFound(res, "Banner not found");
+    }
+
     response.success(res, result, "Banner Fetched Successfully");
   } catch (error) {
     response.error(res, error, "Failed to find one banner");
@@ -67,6 +76,10 @@ const findOne = async (req: IreqUser, res: Response) => {
 const update = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Banner not found");
+    }
 
     const result = await BannerModel.findByIdAndUpdate(id, req.body, { new: true });
     response.success(res, result, "Banner Updated Successfully");
@@ -78,6 +91,10 @@ const update = async (req: IreqUser, res: Response) => {
 const remove = async (req: IreqUser, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return response.notFound(res, "Banner not found");
+    }
 
     const result = await BannerModel.findByIdAndDelete(id, { new: true });
     response.success(res, result, "Banner Deleted Successfully");
