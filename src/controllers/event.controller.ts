@@ -1,12 +1,12 @@
 import { Response } from "express";
 import { IPaginationQuery, IreqUser } from "../utils/interface";
 import response from "../utils/response";
-import EventModel, { eventDAO, TEvent } from "../models/event.model";
+import EventModel, { eventDAO, TypeEvent } from "../models/event.model";
 import { FilterQuery, isValidObjectId } from "mongoose";
 
 const create = async (req: IreqUser, res: Response) => {
   try {
-    const payload = { ...req.body, createdBy: req.user?.id } as TEvent;
+    const payload = { ...req.body, createdBy: req.user?.id } as TypeEvent;
     await eventDAO.validate(payload);
     const result = await EventModel.create(payload);
 
@@ -18,21 +18,31 @@ const create = async (req: IreqUser, res: Response) => {
 
 const findAll = async (req: IreqUser, res: Response) => {
   try {
-    const { limit = 10, page = 1, search } = req.query as unknown as IPaginationQuery;
-    const query: FilterQuery<TEvent> = {};
+    const buildQuery = (filters: any) => {
+      let query: FilterQuery<TypeEvent> = {};
 
-    if (search) {
-      Object.assign(query, {
-        ...query,
-        $text: {
-          $search: search,
-        },
-      });
-    }
+      if (filters.search) query.$text = { $search: filters.search };
+      if (filters.category) query.category = filters.category;
+      if (filters.isOnline) query.isOnline = filters.isOnline;
+      if (filters.isPublish) query.isPublish = filters.isPublish;
+      if (filters.isFeatured) query.isFeatured = filters.isFeatured;
+
+      return query;
+    };
+
+    const { limit = 10, page = 1, search, category, isOnline, isFeatured, isPublish } = req.query;
+
+    const query = buildQuery({
+      search,
+      category,
+      isOnline,
+      isFeatured,
+      isPublish,
+    });
 
     const result = await EventModel.find(query)
-      .limit(limit)
-      .skip((page - 1) * limit)
+      .limit(+limit)
+      .skip((+page - 1) * +limit)
       .sort({ createdAt: -1 })
       .exec();
 
@@ -42,9 +52,9 @@ const findAll = async (req: IreqUser, res: Response) => {
       res,
       result,
       {
-        current: page,
+        current: +page,
         total: count,
-        totalPages: Math.ceil(count / limit),
+        totalPages: Math.ceil(count / +limit),
       },
       "Events fetched successfully"
     );
