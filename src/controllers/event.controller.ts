@@ -44,6 +44,7 @@ const findAll = async (req: IreqUser, res: Response) => {
       .limit(+limit)
       .skip((+page - 1) * +limit)
       .sort({ createdAt: -1 })
+      .lean()
       .exec();
 
     const count = await EventModel.countDocuments(query);
@@ -56,7 +57,7 @@ const findAll = async (req: IreqUser, res: Response) => {
         total: count,
         totalPages: Math.ceil(count / +limit),
       },
-      "Events fetched successfully"
+      "Events fetched successfully",
     );
   } catch (error) {
     response.error(res, error, "Failed to find all events");

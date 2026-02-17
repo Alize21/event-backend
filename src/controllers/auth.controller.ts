@@ -116,7 +116,7 @@ const me = async (req: IreqUser, res: Response) => {
     response.success(res, result, "success get user profile");
   } catch (error) {
     const err = error as unknown as Error;
-    response.error(res, err, "failed get user profile");
+    response.error(res, err, "failed to get user profile");
   }
 };
 
@@ -144,7 +144,7 @@ const activation = async (req: Request, res: Response) => {
       },
       {
         new: true,
-      }
+      },
     );
 
     response.success(res, user, "user successfully activated");
