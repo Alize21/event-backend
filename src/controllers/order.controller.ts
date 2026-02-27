@@ -91,7 +91,47 @@ const findOne = async (req: IreqUser, res: Response) => {
   }
 };
 
-const findAllByMember = async (req: IreqUser, res: Response) => {};
+const findAllByMember = async (req: IreqUser, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const buildQuery = (filters: any) => {
+      let query: FilterQuery<TypeOrder> = {
+        createdBy: userId,
+      };
+      if (filters.search) query.$text = { $search: filters.search };
+
+      return query;
+    };
+
+    const { limit = 10, page = 1, search } = req.query;
+
+    const query = buildQuery({
+      search,
+    });
+
+    const result = await OrderModel.find(query)
+      .limit(+limit)
+      .skip((+page - 1) * +limit)
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    const count = await OrderModel.countDocuments(query);
+
+    response.pagination(
+      res,
+      result,
+      {
+        current: +page,
+        total: count,
+        totalPages: Math.ceil(count / +limit),
+      },
+      "Orders fetched successfully",
+    );
+  } catch (error) {
+    response.error(res, error, "Failed to find all orders");
+  }
+};
 
 const complete = async (req: IreqUser, res: Response) => {
   try {
@@ -145,6 +185,27 @@ const complete = async (req: IreqUser, res: Response) => {
 
 const pending = async (req: IreqUser, res: Response) => {
   try {
+    const { orderId } = req.params;
+
+    const order = await OrderModel.findOne({
+      orderId,
+    });
+
+    if (!order) return response.notFound(res, "Order not found");
+
+    if (order.status === OrderStatus.COMPLETED) return response.error(res, null, "Order is already completed");
+
+    if (order.status === OrderStatus.PENDING) return response.error(res, null, "Order is already pending");
+
+    const result = await OrderModel.findOneAndUpdate(
+      { orderId },
+      {
+        status: OrderStatus.PENDING,
+      },
+      { new: true },
+    );
+
+    response.success(res, result, "Order pending successfully");
   } catch (error) {
     response.error(res, error, "Failed to pending order");
   }
@@ -152,8 +213,49 @@ const pending = async (req: IreqUser, res: Response) => {
 
 const cancelled = async (req: IreqUser, res: Response) => {
   try {
+    const { orderId } = req.params;
+
+    const order = await OrderModel.findOne({
+      orderId,
+    });
+
+    if (!order) return response.notFound(res, "Order not found");
+
+    if (order.status === OrderStatus.COMPLETED) return response.error(res, null, "Order is already completed");
+
+    if (order.status === OrderStatus.CANCELLED) return response.error(res, null, "Order is already cancelled");
+
+    const result = await OrderModel.findOneAndUpdate(
+      { orderId },
+      {
+        status: OrderStatus.CANCELLED,
+      },
+      { new: true },
+    );
+
+    response.success(res, result, "Order cancelled successfully");
   } catch (error) {
     response.error(res, error, "Failed to cancel order");
+  }
+};
+const remove = async (req: IreqUser, res: Response) => {
+  try {
+    const { orderId } = req.params;
+
+    const result = await OrderModel.findOneAndDelete(
+      {
+        orderId,
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (!result) return response.notFound(res, "Order not found");
+
+    response.success(res, result, "Order removed successfully");
+  } catch (error) {
+    response.error(res, error, "Failed to remove order");
   }
 };
 
@@ -165,4 +267,5 @@ export default {
   complete,
   pending,
   cancelled,
+  remove,
 };

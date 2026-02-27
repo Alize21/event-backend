@@ -52,7 +52,7 @@ const doc = {
         startDate: "yyyy-mm-dd hh:mm:ss",
         endDate: "yyyy-mm-dd hh:mm:ss",
         location: {
-          region: "1234567890",
+          region: 3273,
           coordinates: [0.0, 0.0],
           adress: "",
         },
@@ -74,6 +74,11 @@ const doc = {
         events: "69400c3b9b9b257468971669",
         description: "Ticket Reguler - description",
         quantity: 100,
+      },
+      CreateOrderRequest: {
+        events: "event object id",
+        ticket: "ticket object id",
+        quantity: 1,
       },
     },
   },
