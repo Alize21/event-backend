@@ -3,13 +3,13 @@ import * as Yup from "yup";
 
 const Schema = mongoose.Schema;
 
-export const categoryDAO = Yup.object({
+export const categoryDTO = Yup.object({
   name: Yup.string().required(),
   description: Yup.string().required(),
   icon: Yup.string().required(),
 });
 
-export type Category = Yup.InferType<typeof categoryDAO>;
+export type Category = Yup.InferType<typeof categoryDTO>;
 
 const CategorySchema = new Schema<Category>(
   {
@@ -26,7 +26,7 @@ const CategorySchema = new Schema<Category>(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const CategoryModel = mongoose.model("Category", CategorySchema);

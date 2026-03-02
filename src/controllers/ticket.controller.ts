@@ -1,12 +1,12 @@
 import { Response } from "express";
 import { IPaginationQuery, IreqUser } from "../utils/interface";
 import response from "../utils/response";
-import TicketModel, { ticketDAO, TypeTicket } from "../models/ticket.model";
+import TicketModel, { ticketDTO, TypeTicket } from "../models/ticket.model";
 import { FilterQuery, isValidObjectId } from "mongoose";
 
 const create = async (req: IreqUser, res: Response) => {
   try {
-    await ticketDAO.validate(req.body);
+    await ticketDTO.validate(req.body);
     const result = await TicketModel.create(req.body);
     response.success(res, result, "Ticket Created Successfully");
   } catch (error) {
@@ -46,7 +46,7 @@ const findAll = async (req: IreqUser, res: Response) => {
         current: page,
         totalPages: Math.ceil(count / limit),
       },
-      "Tickets Fetched Successfully"
+      "Tickets Fetched Successfully",
     );
   } catch (error) {
     response.error(res, error, "Fetching Tickets Failed");

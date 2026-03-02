@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { IreqUser } from "../utils/interface";
 import response from "../utils/response";
-import OrderModel, { orderDAO, OrderStatus, TypeOrder, TypeVoucher } from "../models/order.model";
+import OrderModel, { orderDTO, OrderStatus, TypeOrder, TypeVoucher } from "../models/order.model";
 import TicketModel from "../models/ticket.model";
 import { FilterQuery } from "mongoose";
 import { getId } from "../utils/id";
@@ -13,7 +13,7 @@ const create = async (req: IreqUser, res: Response) => {
       ...req.body,
       createdBy: userId,
     } as TypeOrder;
-    await orderDAO.validate(payload);
+    await orderDTO.validate(payload);
 
     const ticket = await TicketModel.findById(payload.ticket);
     if (!ticket) return response.notFound(res, "Ticket not found");

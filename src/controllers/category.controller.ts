@@ -1,12 +1,12 @@
 import { Response } from "express";
 import { IPaginationQuery, IreqUser } from "../utils/interface";
-import CategoryModel, { categoryDAO } from "../models/category.model";
+import CategoryModel, { categoryDTO } from "../models/category.model";
 import response from "../utils/response";
 import { isValidObjectId } from "mongoose";
 
 const create = async (req: IreqUser, res: Response) => {
   try {
-    await categoryDAO.validate(req.body);
+    await categoryDTO.validate(req.body);
     const result = await CategoryModel.create(req.body);
     response.success(res, result, "category created successfully");
   } catch (error) {
@@ -68,7 +68,7 @@ const findAll = async (req: IreqUser, res: Response) => {
         totalPages: Math.ceil(count / limit),
         current: page,
       },
-      "successfully found all categories"
+      "successfully found all categories",
     );
   } catch (error) {
     response.error(res, error, "failed to find all categories");

@@ -1,12 +1,12 @@
 import { Response } from "express";
 import { IPaginationQuery, IreqUser } from "../utils/interface";
 import response from "../utils/response";
-import BannerModel, { bannerDAO, TypeBanner } from "../models/banner.model";
+import BannerModel, { bannerDTO, TypeBanner } from "../models/banner.model";
 import { FilterQuery, isValidObjectId } from "mongoose";
 
 const create = async (req: IreqUser, res: Response) => {
   try {
-    await bannerDAO.validate(req.body);
+    await bannerDTO.validate(req.body);
 
     const result = await BannerModel.create(req.body);
     response.success(res, result, "Banner created successfully");
@@ -46,7 +46,7 @@ const findAll = async (req: IreqUser, res: Response) => {
         current: page,
         totalPages: Math.ceil(count / limit),
       },
-      "Banners Fetched Successfully"
+      "Banners Fetched Successfully",
     );
   } catch (error) {
     response.error(res, error, "Failed to find all banners");
