@@ -1,58 +1,71 @@
 import { Request, Response } from "express";
 import * as Yup from "yup";
-import UserModel from "../models/user.model";
+import UserModel, { userDTO, userLoginDTO, userUpdatePasswordDTO } from "../models/user.model";
 import { encrypt } from "../utils/encryption";
 import { generateToken } from "../utils/jwt";
 import { IreqUser } from "../utils/interface";
 import response from "../utils/response";
 
-type Tregister = {
-  fullName: string;
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
+const updateProfile = async (req: IreqUser, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { fullName, profilePicture } = req.body;
+
+    const result = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        fullName,
+        profilePicture,
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (!result) return response.notFound(res, "user not found");
+
+    response.success(res, result, "user profile updated successfully");
+  } catch (error) {
+    response.error(res, error, "failed to update user profile");
+  }
 };
 
-type Tlogin = {
-  identifier: string;
-  password: string;
-};
+const updatePassword = async (req: IreqUser, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { oldPassword, password, confirmPassword } = req.body;
 
-const registerValidateSchema = Yup.object({
-  fullName: Yup.string().required(),
-  username: Yup.string().required(),
-  email: Yup.string().email().required(),
-  password: Yup.string()
-    .required()
-    .min(6, "Password must be at least 6 characters")
-    .test("at-least-one-uppercase", "Password must contain at least one uppercase letter", (value) => {
-      if (!value) return false;
-      const regex = /^(?=.*[A-Z])/;
-      return regex.test(value);
-    })
-    .test("at-least-one-number", "Password must contain at least one number", (value) => {
-      if (!value) return false;
-      const regex = /^(?=.*\d)/;
-      return regex.test(value);
-    }),
-  confirmPassword: Yup.string()
-    .required()
-    .oneOf([Yup.ref("password")], "Passwords not match"),
-});
+    await userUpdatePasswordDTO.validate({
+      oldPassword,
+      password,
+      confirmPassword,
+    });
+
+    const user = await UserModel.findById(userId);
+
+    if (!user || user.password !== encrypt(oldPassword)) return response.notFound(res, "user not found");
+
+    const result = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        password: encrypt(password),
+      },
+      {
+        new: true,
+      },
+    );
+
+    response.success(res, result, "user password updated successfully");
+  } catch (error) {
+    response.error(res, error, "failed to update user password");
+  }
+};
 
 const register = async (req: Request, res: Response) => {
-  /**
-   #swagger.tags = ['Auth']
-   #swagger.requestBody = {
-      required: true,
-      schema: {$ref: "#/components/schemas/RegisterRequest"}
-    }
-   */
-  const { fullName, username, email, password, confirmPassword } = req.body as unknown as Tregister;
+  const { fullName, username, email, password, confirmPassword } = req.body;
 
   try {
-    await registerValidateSchema.validate({ fullName, username, email, password, confirmPassword });
+    await userDTO.validate({ fullName, username, email, password, confirmPassword });
 
     const result = await UserModel.create({
       fullName,
@@ -69,16 +82,10 @@ const register = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  /**
-    #swagger.tags = ['Auth']
-    #swagger.requestBody = {
-      required: true,
-      schema: {$ref: "#/components/schemas/LoginRequest"}
-    }
-   */
-
-  const { identifier, password } = req.body as unknown as Tlogin;
   try {
+    const { identifier, password } = req.body;
+    await userLoginDTO.validate({ identifier, password });
+
     const userByIdentifier = await UserModel.findOne({
       $or: [{ username: identifier }, { email: identifier }],
       isActive: true,
@@ -103,12 +110,6 @@ const login = async (req: Request, res: Response) => {
 };
 
 const me = async (req: IreqUser, res: Response) => {
-  /**
-    #swagger.tags = ['Auth']
-    #swagger.security = [{
-     "bearerAuth": [] 
-     }]
-   */
   try {
     const user = req.user;
     const result = await UserModel.findById(user?.id);
@@ -121,17 +122,6 @@ const me = async (req: IreqUser, res: Response) => {
 };
 
 const activation = async (req: Request, res: Response) => {
-  /**
-    #swagger.tags = ['Auth']
-    #swagger.requestBody = {
-      required: true,
-      content: {
-        "application/json": {
-          schema: { $ref: "#/components/schemas/ActivationRequest" }
-        }
-      }
-    }
-   */
   try {
     const { code } = req.body as { code: string };
 
@@ -154,4 +144,4 @@ const activation = async (req: Request, res: Response) => {
   }
 };
 
-export { register, login, me, activation };
+export { register, login, me, activation, updateProfile, updatePassword };
