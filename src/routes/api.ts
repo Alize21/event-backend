@@ -525,7 +525,7 @@ router.put(
   */,
 );
 router.delete(
-  "orders/:orderId",
+  "/orders/:orderId",
   [authMiddleware, aclMiddleware([ROLES.ADMIN])],
   orderController.remove,
   /*
